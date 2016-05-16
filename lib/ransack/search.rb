@@ -109,6 +109,8 @@ module Ransack
         else
           @scope_args[method_name]
         end
+      elsif klass.respond_to?(method_id)
+        klass.send(method_id, *args)
       else
         super
       end
