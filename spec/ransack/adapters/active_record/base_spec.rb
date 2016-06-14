@@ -243,8 +243,8 @@ module Ransack
               "s" => { "0" => { "dir" => "asc", "name" => "only_sort" } }
             )
             expect(s.result.to_sql).to match(
-              /ORDER BY #{quote_table_name("people")}.#{
-                quote_column_name("only_sort")} ASC/
+              /ORDER BY NULLIF\(#{quote_table_name("people")}.#{
+                quote_column_name("only_sort")}, ''\) ASC/
             )
           end
 
@@ -280,8 +280,8 @@ module Ransack
               { auth_object: :admin }
             )
             expect(s.result.to_sql).to match(
-              /ORDER BY #{quote_table_name("people")}.#{
-                quote_column_name("only_admin")} ASC/
+              /ORDER BY NULLIF\(#{quote_table_name("people")}.#{
+                quote_column_name("only_admin")}, ''\) ASC/
             )
           end
 
@@ -312,6 +312,30 @@ module Ransack
               /WHERE #{quote_table_name("people")}.#{
                 quote_column_name("only_admin")} = 'htimS cirA'/
             )
+          end
+
+          context 'case insensitive sorting' do
+            it 'allows sort by desc' do
+              search = Person.search(sorts: ['name_case_insensitive desc'])
+             expect(search.result.to_sql).to match /ORDER BY LOWER(.*) DESC/
+            end
+
+            it 'allows sort by asc' do
+              search = Person.search(sorts: ['name_case_insensitive asc'])
+              expect(search.result.to_sql).to match /ORDER BY LOWER(.*) ASC/
+            end
+          end
+
+          context 'regular sorting' do
+            it 'allows sort by desc' do
+              search = Person.search(sorts: ['name desc'])
+              expect(search.result.to_sql).to match /ORDER BY .* DESC/
+            end
+
+            it 'allows sort by asc' do
+              search = Person.search(sorts: ['name asc'])
+              expect(search.result.to_sql).to match /ORDER BY .* ASC/
+            end
           end
         end
 
