@@ -41,7 +41,18 @@ module Ransack
     end
 
     def visit_Ransack_Nodes_Sort(object)
-      object.attr.send(object.dir) if object.valid?
+      return unless object.valid?
+
+      if sort_column_string?(object)
+        with_nullif = Arel::Nodes::NamedFunction.new("NULLIF", [object.attr, Arel::Nodes.build_quoted('')])
+      end
+
+      case object.dir
+        when 'asc'.freeze
+          Arel::Nodes::Ascending.new(with_nullif || object.attr)
+        when 'desc'.freeze
+          Arel::Nodes::Descending.new(with_nullif || object.attr)
+      end
     end
 
     def quoted?(object)
@@ -58,5 +69,14 @@ module Ransack
         }"
     end
 
+    private
+
+    def sort_column_string?(object)
+      model = object.parent.base_klass
+      if model
+        column_name = model.columns_hash[object.attr_name]
+        column_name.type.to_s == 'string' if column_name
+      end
+    end
   end
 end
