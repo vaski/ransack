@@ -243,8 +243,8 @@ module Ransack
               "s" => { "0" => { "dir" => "asc", "name" => "only_sort" } }
             )
             expect(s.result.to_sql).to match(
-              /ORDER BY NULLIF\(#{quote_table_name("people")}.#{
-                quote_column_name("only_sort")}, ''\) ASC/
+              /ORDER BY NULLIF\(LOWER\(#{quote_table_name("people")}.#{
+                quote_column_name("only_sort")}\), ''\) ASC/
             )
           end
 
@@ -280,8 +280,8 @@ module Ransack
               { auth_object: :admin }
             )
             expect(s.result.to_sql).to match(
-              /ORDER BY NULLIF\(#{quote_table_name("people")}.#{
-                quote_column_name("only_admin")}, ''\) ASC/
+              /ORDER BY NULLIF\(LOWER\(#{quote_table_name("people")}.#{
+                quote_column_name("only_admin")}\), ''\) ASC/
             )
           end
 
