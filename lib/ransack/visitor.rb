@@ -44,7 +44,7 @@ module Ransack
       return unless object.valid?
 
       if sort_column_string?(object)
-        with_nullif = Arel::Nodes::NamedFunction.new("NULLIF", [object.attr, Arel::Nodes.build_quoted('')])
+        with_nullif = Arel::Nodes::NamedFunction.new("NULLIF", [object.attr.lower, Arel::Nodes.build_quoted('')])
       end
 
       case object.dir
@@ -75,7 +75,7 @@ module Ransack
       model = object.parent.base_klass
       if model
         column_name = model.columns_hash[object.attr_name]
-        column_name.type.to_s == 'string' if column_name
+        column_name.type.to_s == 'string' if column_name && object.attr.is_a?(Arel::Attributes::Attribute)
       end
     end
   end
